@@ -1,0 +1,383 @@
+openapi: 3.1.0
+info:
+  title: Payroo Mini Payrun API
+  version: 1.0.0
+servers:
+  - url: http://localhost:4000
+paths:
+  /auth/register:
+    post:
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+      responses:
+        "201":
+          description: User registered successfully
+  /auth/login:
+    post:
+      summary: Login user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+  /auth/logout:
+    post:
+      summary: Logout current user
+      responses:
+        "200":
+          description: Logged out
+  /auth/me:
+    get:
+      summary: Get authenticated user profile
+      responses:
+        "200":
+          description: Current user
+  /employees:
+    get:
+      summary: List all employees (paginated)
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+        - in: query
+          name: limit
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Employee list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Employee"
+                  total:
+                    type: integer
+                  page:
+                    type: integer
+                  totalPages:
+                    type: integer
+    post:
+      summary: Create one or multiple employees
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: "#/components/schemas/Employee"
+                - type: array
+                  items:
+                    $ref: "#/components/schemas/Employee"
+      responses:
+        "201":
+          description: Employee(s) created
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Employee"
+  /employees/{id}:
+    put:
+      summary: Update an employee
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Employee"
+      responses:
+        "200":
+          description: Employee updated
+    delete:
+      summary: Delete an employee
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Employee deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    $ref: "#/components/schemas/Employee"
+  /timesheets:
+    get:
+      summary: List all timesheets
+      responses:
+        "200":
+          description: Timesheet list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Timesheet"
+    post:
+      summary: Create a new timesheet
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Timesheet"
+      responses:
+        "201":
+          description: Timesheet created
+    put:
+      summary: Update a timesheet
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Timesheet"
+      responses:
+        "200":
+          description: Timesheet updated
+    delete:
+      summary: Delete a timesheet
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Timesheet deleted
+  /payruns:
+    get:
+      summary: List all payruns
+      responses:
+        "200":
+          description: Payrun list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Payrun"
+    post:
+      summary: Generate a payrun for a given date range
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PayrunRequest"
+      responses:
+        "201":
+          description: Payrun generated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Payrun"
+  /payruns/{id}:
+    get:
+      summary: Get a specific payrun by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Payrun details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Payrun"
+  /payslips/{employeeId}/{payrunId}:
+    get:
+      summary: Get a payslip for an employee and payrun
+      parameters:
+        - in: path
+          name: employeeId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: payrunId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Payslip details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Payslip"
+components:
+  schemas:
+    RegisterRequest:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+        enabled:
+          type: boolean
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+    Employee:
+      type: object
+      properties:
+        id:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        type:
+          type: string
+        baseHourlyRate:
+          type: number
+        superRate:
+          type: number
+        bank:
+          type: object
+          properties:
+            bsb:
+              type: string
+            account:
+              type: string
+    Timesheet:
+      type: object
+      properties:
+        employeeId:
+          type: string
+        periodStart:
+          type: string
+          format: date
+        periodEnd:
+          type: string
+          format: date
+        allowances:
+          type: number
+        entries:
+          type: array
+          items:
+            type: object
+            properties:
+              date:
+                type: string
+              start:
+                type: string
+              end:
+                type: string
+              unpaidBreakMins:
+                type: integer
+    PayrunRequest:
+      type: object
+      properties:
+        periodStart:
+          type: string
+          format: date
+        periodEnd:
+          type: string
+          format: date
+        employeeIds:
+          type: array
+          items:
+            type: string
+    Payslip:
+      type: object
+      properties:
+        employeeId:
+          type: string
+        normalHours:
+          type: number
+        overtimeHours:
+          type: number
+        gross:
+          type: number
+        tax:
+          type: number
+        super:
+          type: number
+        net:
+          type: number
+    Payrun:
+      type: object
+      properties:
+        id:
+          type: string
+        periodStart:
+          type: string
+        periodEnd:
+          type: string
+        totals:
+          type: object
+          properties:
+            gross:
+              type: number
+            tax:
+              type: number
+            super:
+              type: number
+            net:
+              type: number
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Payslip"
