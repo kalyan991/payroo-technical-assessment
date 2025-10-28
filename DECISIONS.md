@@ -53,6 +53,7 @@
 - Add metrics and structured logging for better monitoring.  
 - Add email functionality to send emails to the employees with payslip summary.
 - Add select employee feature on the payrun page to run the payrun for selected employees.  
+- I’m very interested in designing and implementing the payment functionality. As a Stripe-certified developer holding three(3) Stripe certifications, this feature will be a great opportunity to demonstrate my expertise in the payments domain.
 
 ---
 
