@@ -1,0 +1,18 @@
+import { calculateTax, calculateGross, calculateSuper, calculateNet } from "./payrunLogic"
+
+test("Tax brackets work correctly", () => {
+  expect(calculateTax(1325)).toBeCloseTo(133.75)
+  expect(calculateTax(2328)).toBeCloseTo(436.1)
+})
+
+test("Gross & net calculations work correctly", () => {
+  const gross = calculateGross(37, 0, 35, 30)
+  expect(gross).toBeCloseTo(1325)
+  const tax = calculateTax(gross)
+  const net = calculateNet(gross, tax)
+  expect(net).toBeCloseTo(1191.25)
+})
+
+test("Super calculation correct", () => {
+  expect(calculateSuper(1325)).toBeCloseTo(152.38)
+})

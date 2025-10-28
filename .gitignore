@@ -1,0 +1,29 @@
+# Node dependencies
+node_modules/
+
+# Build outputs
+api/dist/
+web/dist/
+
+# Environment files
+*.env
+*.env.*
+!.env.sample
+
+# Logs and temp files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+.DS_Store
+
+# Prisma generated files
+api/prisma/dev.db
+api/prisma/*.db-journal
+
+# Test coverage
+coverage/
+
+# Local files and archives
+*.tar
+*.zip
