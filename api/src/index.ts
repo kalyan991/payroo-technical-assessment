@@ -62,7 +62,7 @@ app.use(errorHandler)
 
 export default app
 
-if (process.env.NODE_ENV !== "lambda") {
+if (process.env.NODE_ENV !== "test" && process.env.NODE_ENV !== "lambda") {
   const PORT = process.env.PORT || 4000
   app.listen(PORT, () => {
     logger.info(`Server running on port ${PORT}`)

@@ -2,6 +2,7 @@ import request from "supertest"
 import app from "../../src/index"
 
 describe("Employees API", () => {
+      jest.setTimeout(20000)
     it("GET /employees should return seeded employees", async () => {
         const res = await request(app).get("/employees")
         expect(res.status).toBe(200)

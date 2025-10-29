@@ -83,6 +83,27 @@ export default function TimesheetModal({
 
   const handleFormSubmit = (values: any) => {
     if (isReadOnly) return
+
+    const startDate = new Date(values.periodStart)
+    const endDate = new Date(values.periodEnd)
+    if (endDate <= startDate) {
+      toast.error("Period end date must be later than the start date.")
+      return
+    }
+
+    for (let i = 0; i < values.entries.length; i++) {
+      const entry = values.entries[i]
+      if (!entry.start || !entry.end) continue
+
+      const startTime = new Date(`1970-01-01T${entry.start}`)
+      const endTime = new Date(`1970-01-01T${entry.end}`)
+
+      if (endTime <= startTime) {
+        toast.error(`Entry ${i + 1}: End time must be later than start time.`)
+        return
+      }
+    }
+
     const payload = {
       ...values,
       periodStart: formatInTimeZone(new Date(values.periodStart), 'Australia/Melbourne', 'yyyy-MM-dd'),
@@ -95,8 +116,10 @@ export default function TimesheetModal({
         unpaidBreakMins: Number(e.unpaidBreakMins) || 0,
       })),
     }
+
     timesheetMutation.mutate(payload)
   }
+
 
   const employeeList = employees?.data || []
 

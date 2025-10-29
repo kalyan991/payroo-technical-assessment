@@ -41,6 +41,7 @@ The project is built as a **full-stack TypeScript application** deployed on **AW
 - CRUD operations for Employees and Timesheets  
 - Generate Payruns with automatic Gross, Tax, Super, and Net calculations  
 - Progressive tax brackets and 38-hour weekly overtime threshold  
+- Added Stripe for fund transfer once the payrun for the timesheets is successful.
 - Secure API configuration using Helmet + CORS  
 - Unit and API tests implemented with Jest and Supertest  
 - Deployed using AWS Lambda (serverless backend) and CloudFront (static frontend)
@@ -53,6 +54,15 @@ The project is built as a **full-stack TypeScript application** deployed on **AW
 - **Totals:** Gross $3,653 → Tax $569.85 → Super $420.10 → Net $3,083.15  
 
 ---
+
+---
+
+### Stripe (Payments) — Test mode & secrets
+
+This project integrates Stripe to transfer funds for completed payruns. **Only Stripe test keys must be used.**
+lease use the Stripe Connect account IDs provided to you and link them to the employees when creating their profiles. These account IDs ensure smooth and seamless fund transfers.
+---
+
 
 ### Repository Structure:
 ```

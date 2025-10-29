@@ -4,6 +4,7 @@ node_modules/
 # Build outputs
 api/dist/
 web/dist/
+api/generated/
 
 # Environment files
 *.env

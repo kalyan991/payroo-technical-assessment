@@ -3,7 +3,7 @@ import prisma from "../lib/prisma"
 import { zonedTimeToUtc, formatInTimeZone } from 'date-fns-tz'
 import { generateAndUploadPayslipPDF } from "../lib/payslipPdfUploader"
 import { createTransfer } from "./stripe.service"
-import { PaymentStatus } from "../generated/prisma/enums"
+import { PaymentStatus } from "@prisma/client"
 
 class PayrunService {
   async generate(data: any) {

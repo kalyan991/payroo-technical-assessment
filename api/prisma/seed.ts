@@ -1,4 +1,4 @@
-import "dotenv/config"    
+import "dotenv/config"
 import prisma from "../src/lib/prisma"
 
 async function main() {
@@ -13,6 +13,7 @@ async function main() {
         superRate: 0.115,
         bankBsb: "083-123",
         bankAccount: "12345678",
+        stripeAccountId: "acct_1RW2594GvMcr4y12",
       },
       {
         id: "e-bob",
@@ -23,6 +24,7 @@ async function main() {
         superRate: 0.115,
         bankBsb: "062-000",
         bankAccount: "98765432",
+        stripeAccountId:"acct_1REB8xQKS8uCL7DL"
       },
     ],
   })
