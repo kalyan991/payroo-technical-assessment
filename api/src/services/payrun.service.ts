@@ -2,6 +2,8 @@ import { calculateGross, calculateHours, calculateNet, calculateSuper, calculate
 import prisma from "../lib/prisma"
 import { zonedTimeToUtc, formatInTimeZone } from 'date-fns-tz'
 import { generateAndUploadPayslipPDF } from "../lib/payslipPdfUploader"
+import { createTransfer } from "./stripe.service"
+import { PaymentStatus } from "../generated/prisma/enums"
 
 class PayrunService {
   async generate(data: any) {
@@ -11,10 +13,7 @@ class PayrunService {
     const existingPayrun = await prisma.payrun.findFirst({
       where: {
         OR: [
-          {
-            periodStart: { lte: periodEndDate },
-            periodEnd: { gte: periodStartDate },
-          },
+          { periodStart: { lte: periodEndDate }, periodEnd: { gte: periodStartDate } },
         ],
       },
     })
@@ -36,7 +35,16 @@ class PayrunService {
       const tax = calculateTax(gross)
       const superAmt = calculateSuper(gross)
       const net = calculateNet(gross, tax)
-      return { employeeId: sheet.employeeId, normalHours, overtimeHours, gross, tax, super: superAmt, net }
+      return {
+        employeeId: sheet.employeeId,
+        normalHours,
+        overtimeHours,
+        gross,
+        tax,
+        super: superAmt,
+        net,
+        paymentStatus: "PENDING",
+      }
     })
     if (payslipsData.length === 0) throw new Error("No payable hours found in this range.")
 
@@ -60,13 +68,20 @@ class PayrunService {
         totalSuper,
         totalNet,
         timesheetIds: timesheets.map((t) => t.id),
-        payslips: { create: payslipsData },
       },
-      include: {
-        payslips: {
-          include: { employee: true },
-        },
-      },
+    })
+
+    await prisma.payslip.createMany({
+      data: payslipsData.map((p) => ({
+        ...p,
+        payrunId: payrun.id,
+        paymentStatus: PaymentStatus.PENDING,
+      })),
+    })
+
+    const fullPayrun = await prisma.payrun.findUnique({
+      where: { id: payrun.id },
+      include: { payslips: { include: { employee: true } } },
     })
 
     await prisma.timesheet.updateMany({
@@ -74,14 +89,39 @@ class PayrunService {
       data: { status: "PROCESSED", payrunId: payrun.id },
     })
 
-    for (const slip of payrun.payslips) {
-      await generateAndUploadPayslipPDF(slip, periodStartDate, periodEndDate)
+    for (const slip of fullPayrun!.payslips) {
+      let updatedSlip = slip
+
+      if (slip.employee.stripeAccountId) {
+        try {
+          const transfer = await createTransfer({
+            amountInCents: Math.round(slip.net * 100),
+            currency: "usd",
+            destination: slip.employee.stripeAccountId,
+            description: `Payrun ${label} - ${slip.employee.firstName} ${slip.employee.lastName}`,
+          })
+
+          updatedSlip = await prisma.payslip.update({
+            where: { id: slip.id },
+            data: { stripeTransferId: transfer.id, paymentStatus: "PAID" },
+            include: { employee: true },
+          })
+        } catch (error) {
+          console.error(`❌ Transfer failed for ${slip.employeeId}:`, error)
+          continue
+        }
+      } else {
+        console.log(`No Stripe account for employee ${slip.employeeId}`)
+      }
+
+      await generateAndUploadPayslipPDF(updatedSlip, periodStartDate, periodEndDate)
     }
+
 
     return {
       message: "Payrun generated successfully.",
       payrunName: label,
-      payrun,
+      payrun: fullPayrun,
     }
   }
 

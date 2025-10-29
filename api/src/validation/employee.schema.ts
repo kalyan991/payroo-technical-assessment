@@ -11,4 +11,5 @@ export const employeeSchema = Joi.object({
     bsb: Joi.string().required(),
     account: Joi.string().required(),
   }).required(),
+  stripeAccountId: Joi.string().optional(),
 })

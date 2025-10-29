@@ -87,6 +87,28 @@ export default function PayslipPage() {
                     <p className="text-gray-500">Payrun ID</p>
                     <p className="font-medium text-gray-800">{payrun.id}</p>
                 </div>
+                <div>
+                    <p className="text-gray-500">Payment Status</p>
+                    <p
+                        className={`font-medium ${payslipData.paymentStatus === "PAID"
+                                ? "text-green-700"
+                                : payslipData.paymentStatus === "FAILED"
+                                    ? "text-red-600"
+                                    : "text-yellow-600"
+                            }`}
+                    >
+                        {payslipData.paymentStatus}
+                    </p>
+                </div>
+
+                {payslipData.stripeTransferId && (
+                    <div>
+                        <p className="text-gray-500">Stripe Transfer ID</p>
+                        <p className="font-medium text-gray-800 break-all">
+                            {payslipData.stripeTransferId}
+                        </p>
+                    </div>
+                )}
             </div>
 
             <h3 className="font-medium text-gray-800 mb-2">Earnings Summary</h3>

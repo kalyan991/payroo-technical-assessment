@@ -1,6 +1,6 @@
 generator client {
   provider = "prisma-client"
-  seed = "ts-node prisma/seed.ts"
+  seed     = "ts-node prisma/seed.ts"
   output   = "../src/generated/prisma"
 }
 
@@ -12,26 +12,27 @@ datasource db {
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
-  password  String   
+  password  String
   enabled   Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model Employee {
-  id             String   @id
-  firstName      String
-  lastName       String
-  type           String
-  baseHourlyRate Float
-  superRate      Float
-  bankBsb        String
-  bankAccount    String
-  deleted        Boolean  @default(false)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  timesheets     Timesheet[]
-  payslips       Payslip[]
+  id              String      @id
+  firstName       String
+  lastName        String
+  type            String
+  baseHourlyRate  Float
+  superRate       Float
+  bankBsb         String
+  bankAccount     String
+  deleted         Boolean     @default(false)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  timesheets      Timesheet[]
+  payslips        Payslip[]
+  stripeAccountId String?
 }
 
 enum TimesheetStatus {
@@ -49,9 +50,9 @@ model Timesheet {
   employee    Employee         @relation(fields: [employeeId], references: [id])
   entries     TimesheetEntry[]
   status      TimesheetStatus  @default(UNPROCESSED)
-  payrunId    String?  
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  payrunId    String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
 }
 
 model TimesheetEntry {
@@ -62,37 +63,45 @@ model TimesheetEntry {
   end             String
   unpaidBreakMins Int
   timesheet       Timesheet @relation(fields: [timesheetId], references: [id])
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 }
 
 model Payrun {
-  id          String    @id @default(uuid())
-  periodStart DateTime
-  periodEnd   DateTime
-  totalGross  Float
-  totalTax    Float
-  totalSuper  Float
-  totalNet    Float
-  timesheetIds  String[]  @default([])
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  payslips    Payslip[]
+  id           String    @id @default(uuid())
+  periodStart  DateTime
+  periodEnd    DateTime
+  totalGross   Float
+  totalTax     Float
+  totalSuper   Float
+  totalNet     Float
+  timesheetIds String[]  @default([])
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  payslips     Payslip[]
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
 }
 
 model Payslip {
-  id            String   @id @default(uuid())
-  employeeId    String
-  payrunId      String
-  normalHours   Float
-  overtimeHours Float
-  gross         Float
-  tax           Float
-  super         Float
-  net           Float
-  employee      Employee @relation(fields: [employeeId], references: [id])
-  payrun        Payrun   @relation(fields: [payrunId], references: [id])
-  pdfUrl        String? 
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id               String        @id @default(uuid())
+  employeeId       String
+  payrunId         String
+  normalHours      Float
+  overtimeHours    Float
+  gross            Float
+  tax              Float
+  super            Float
+  net              Float
+  employee         Employee      @relation(fields: [employeeId], references: [id])
+  payrun           Payrun        @relation(fields: [payrunId], references: [id])
+  pdfUrl           String?
+  stripeTransferId String?
+  paymentStatus    PaymentStatus
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
 }

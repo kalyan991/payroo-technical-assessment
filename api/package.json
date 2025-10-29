@@ -36,7 +36,8 @@
     "pdfkit-table": "^0.1.99",
     "pino": "^10.1.0",
     "pino-pretty": "^13.1.2",
-    "prisma": "^6.18.0"
+    "prisma": "^6.18.0",
+    "stripe": "^19.1.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",

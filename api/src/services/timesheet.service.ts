@@ -38,6 +38,11 @@ class TimesheetService {
 
     const payrunRecord = await prisma.payrun.findFirst({
       where: {
+        payslips: {
+          some: {
+            employeeId: data.employeeId,
+          },
+        },
         periodStart: { lte: periodEndDate },
         periodEnd: { gte: periodStartDate },
       },

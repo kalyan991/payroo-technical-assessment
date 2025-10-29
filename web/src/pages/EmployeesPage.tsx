@@ -68,6 +68,7 @@ export default function EmployeesPage() {
                 <th className="p-2 text-left">Hourly Rate</th>
                 <th className="p-2 text-left">Super Rate</th>
                 <th className="p-2 text-left">Bank</th>
+                <th className="p-2 text-left">Stripe Account Id</th>
                 <th className="p-2 text-center">Actions</th>
               </tr>
             </thead>
@@ -82,6 +83,9 @@ export default function EmployeesPage() {
                   <td className="p-2">{(e.superRate * 100).toFixed(1)}%</td>
                   <td className="p-2">
                     {e.bankBsb} / {e.bankAccount}
+                  </td>
+                  <td className="p-2">
+                    {e.stripeAccountId}
                   </td>
                   <td className="p-2 flex items-center justify-center gap-2">
                     <button

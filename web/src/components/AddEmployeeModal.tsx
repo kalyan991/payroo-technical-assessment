@@ -29,6 +29,7 @@ export default function EmployeeModal({
             superRate: "",
             bankBsb: "",
             bankAccount: "",
+            stripeAccountId: "",
         },
     })
 
@@ -42,6 +43,7 @@ export default function EmployeeModal({
                 superRate: editData.superRate,
                 bankBsb: editData.bankBsb,
                 bankAccount: editData.bankAccount,
+                stripeAccountId: editData.stripeAccountId || "",
             })
         }
     }, [editData, reset])
@@ -73,6 +75,7 @@ export default function EmployeeModal({
             superRate: Number(watchedValues.superRate),
             bankBsb: watchedValues.bankBsb,
             bankAccount: watchedValues.bankAccount,
+            stripeAccountId: watchedValues.stripeAccountId,
         }
         const cleanEdit = {
             id: editData.id,
@@ -82,6 +85,7 @@ export default function EmployeeModal({
             superRate: Number(editData.superRate),
             bankBsb: editData.bankBsb,
             bankAccount: editData.bankAccount,
+            stripeAccountId: editData.stripeAccountId,
         }
         return JSON.stringify(cleanWatched) !== JSON.stringify(cleanEdit)
     }, [watchedValues, editData])
@@ -98,6 +102,7 @@ export default function EmployeeModal({
                 bsb: values.bankBsb.trim(),
                 account: values.bankAccount.trim(),
             },
+            stripeAccountId: values.stripeAccountId?.trim() || null,
         }
         employeeMutation.mutate(employeeData)
     }
@@ -211,6 +216,15 @@ export default function EmployeeModal({
                                 <p className="text-red-500 text-xs mt-1">{String(errors.bankAccount.message)}</p>
                             )}
                         </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Stripe Account ID</label>
+                            <input
+                                {...register("stripeAccountId")}
+                                placeholder="acct_1XXXXXXX"
+                                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                        </div>
+
                     </div>
 
                     <div className="flex justify-end gap-3 pt-4">

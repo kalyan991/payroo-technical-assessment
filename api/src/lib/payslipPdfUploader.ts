@@ -5,6 +5,7 @@ import os from "os"
 import path from "path"
 import { formatInTimeZone } from "date-fns-tz"
 import prisma from "../lib/prisma"
+import "dotenv/config"
 
 /**
  * Generates a formatted payslip PDF and uploads to S3.
@@ -15,12 +16,12 @@ export async function generateAndUploadPayslipPDF(
   periodEndDate: Date
 ): Promise<string | null> {
   try {
-    // ✅ Skip if S3 not configured
+    // Skip if S3 not configured
     if (
       !process.env.CURRENT_ACCESS_KEY_ID ||
       !process.env.CURRENT_SECRET_ACCESS_KEY ||
       !process.env.BUCKET_NAME ||
-      !process.env.AWS_REGION
+      !process.env.CURRENT_REGION
     ) {
       console.log("⚠️  S3 environment variables not found — skipping PDF generation.")
       return null
@@ -29,7 +30,7 @@ export async function generateAndUploadPayslipPDF(
     const s3 = new AWS.S3({
       accessKeyId: process.env.CURRENT_ACCESS_KEY_ID,
       secretAccessKey: process.env.CURRENT_SECRET_ACCESS_KEY,
-      region: process.env.AWS_REGION,
+      region: process.env.CURRENT_REGION,
     })
 
     const tmpPath = path.join(os.tmpdir(), `${slip.id}.pdf`)
@@ -37,10 +38,10 @@ export async function generateAndUploadPayslipPDF(
     const doc = new PDFDocument({ margin: 50 })
     doc.pipe(stream)
 
-    // ✅ Header
+    // Header
     doc.fontSize(18).text("Payslip", { align: "center" }).moveDown(1.5)
 
-    // ✅ Employee info
+    // Employee info
     doc.fontSize(12)
     doc.text(`Employee: ${slip.employee.firstName} ${slip.employee.lastName}`)
     doc.text(`Employee ID: ${slip.employeeId}`)
@@ -52,9 +53,11 @@ export async function generateAndUploadPayslipPDF(
       )}`
     )
     doc.text(`Generated: ${formatInTimeZone(new Date(), "Australia/Melbourne", "dd MMM yyyy")}`)
+    if (slip.stripeTransferId) {
+      doc.text(`Stripe Transfer ID: ${slip.stripeTransferId}`)
+    }
     doc.moveDown(1.5)
-
-    // ✅ Earnings Summary Table
+    // Earnings Summary Table
     await doc.table(
       {
         title: "Earnings Summary",
@@ -77,7 +80,7 @@ export async function generateAndUploadPayslipPDF(
 
     doc.moveDown(1)
 
-    // ✅ Summary Breakdown Table
+    // Summary Breakdown Table
     await doc.table(
       {
         title: "Summary Breakdown",
@@ -98,7 +101,7 @@ export async function generateAndUploadPayslipPDF(
     doc.end()
     await new Promise<void>((resolve) => stream.on("finish", resolve))
 
-    // ✅ Upload to S3
+    // Upload to S3
     const fileBuffer = fs.readFileSync(tmpPath)
     const s3Key = `payslips/${slip.id}.pdf`
     await s3
@@ -114,15 +117,15 @@ export async function generateAndUploadPayslipPDF(
 
     fs.unlinkSync(tmpPath)
 
-    const s3Url = `https://${process.env.BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${s3Key}`
+    const s3Url = `https://${process.env.BUCKET_NAME}.s3.${process.env.CURRENT_REGION}.amazonaws.com/${s3Key}`
 
-    // ✅ Update DB record
+    // Update DB record
     await prisma.payslip.update({
       where: { id: slip.id },
       data: { pdfUrl: s3Url },
     })
 
-    console.log(`✅ Uploaded payslip for ${slip.employeeId}`)
+    console.log(`Uploaded payslip for ${slip.employeeId}`)
     return s3Url
   } catch (err) {
     console.error("❌ Error generating/uploading payslip PDF:", err)

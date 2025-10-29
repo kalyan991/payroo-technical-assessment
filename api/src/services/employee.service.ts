@@ -39,6 +39,7 @@ class EmployeeService {
                 superRate: data.superRate,
                 bankBsb: data.bank.bsb,
                 bankAccount: data.bank.account,
+                stripeAccountId: data.stripeAccountId,
             },
         })
     }
@@ -58,6 +59,7 @@ class EmployeeService {
                 superRate: data.superRate,
                 bankBsb: data.bank.bsb,
                 bankAccount: data.bank.account,
+                stripeAccountId: data.stripeAccountId,
             },
         })
     }
